@@ -1,0 +1,403 @@
+<!--
+  Hit RUN to see this project in action!
+
+  This project will auto-refresh as you edit the HTML, CSS and JS. See README.md for more info (including how to disable auto-refresh and install packages).
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title> EcoVibe Kenya- LPG Cylinder Tracking Kenya</title>
+
+  <!-- Your existing CSS -->
+  <link href="style.css" rel="stylesheet" type="text/css" />
+
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <!-- Leaflet (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- html5-qrcode (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+  <!-- Leaflet JS loaded later before script.js in footer (or via module import in script.js if needed) -->
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <h2>Loading EcoVibe Kenya...</h2>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="header" id="header">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <i class="fas fa-leaf"></i>
+        <span>EcoVibe Kenya</span>
+      </div>
+      <div class="nav-menu" id="nav-menu">
+        <a href="#dashboard" class="nav-link" data-page="dashboard">
+          <i class="fas fa-chart-dashboard"></i> Dashboard
+        </a>
+        <a href="#cylinders" class="nav-link" data-page="cylinders">
+          <i class="fas fa-gas-pump"></i> LPG Cylinders
+        </a>
+        <a href="#distributors" class="nav-link" data-page="distributors">
+          <i class="fas fa-store"></i> Distributors
+        </a>
+        <a href="#deliveries" class="nav-link" data-page="deliveries">
+          <i class="fas fa-truck"></i> Deliveries
+        </a>
+        <a href="#alerts" class="nav-link" data-page="alerts">
+          <i class="fas fa-exclamation-triangle"></i> Alerts
+        </a>
+      </div>
+      <div class="nav-user">
+        <span id="user-name">Guest</span>
+        <button id="logout-btn" class="btn-logout" style="display: none;">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+        <!-- Dark / Light toggle -->
+        <button id="theme-toggle" title="Toggle dark / light mode" style="margin-left:8px;">
+          <i id="theme-icon" class="fas fa-moon"></i>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    
+    <!-- Landing Page -->
+    <section id="landing-page" class="page active">
+      <div class="hero-section">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            <i class="fas fa-leaf"></i>
+            EcoVibe Kenya
+          </h1>
+          <p class="hero-subtitle">Smart LPG Cylinder Tracking & Management System</p>
+          <p class="hero-description">
+            Track LPG cylinders across Kenya in real-time with QR codes, IoT sensors, and smart analytics. 
+            Monitor TotalEnergies, SupaGas, Gas Yetu, and other major distributors nationwide.
+          </p>
+          
+          <div class="auth-section" id="auth-section">
+            <div class="auth-form">
+              <h3>Sign In</h3>
+              <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+              </div>
+              <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+              </div>
+              <div class="form-group">
+                <label for="role">Role:</label>
+                <select id="role" required>
+                  <option value="">Select Role</option>
+                  <option value="admin">Admin</option>
+                  <option value="distributor">Distributor</option>
+                  <option value="retailer">Retailer</option>
+                  <option value="consumer">Consumer</option>
+                </select>
+              </div>
+              <button id="login-btn" class="btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <i class="fas fa-qrcode"></i>
+            <h3>QR Code Tracking</h3>
+            <p>Scan LPG cylinders instantly with QR codes for real-time tracking across Kenya</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Kenya Coverage</h3>
+            <p>Full coverage across all 47 counties with major distributors like TotalEnergies & SupaGas</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Safety Compliance</h3>
+            <p>EPRA-compliant tracking and safety monitoring for all LPG operations</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Analytics</h3>
+            <p>Smart analytics for demand forecasting and inventory optimization</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Page -->
+    <section id="dashboard-page" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-chart-dashboard"></i> Kenya LPG Dashboard</h2>
+        <div class="header-actions">
+          <button id="refresh-data" class="btn-secondary">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+      </div>
+      
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <i class="fas fa-gas-pump"></i>
+          </div>
+          <div class="kpi-content">
+            <h3 id="total-cylinders">0</h3>
+            <p>Active LPG Cylinders</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon warning">
+            <i class="fas fa-store"></i>
+          </div>
+          <div class="kpi-content">
+            <h3 id="active-distributors">0</h3>
+            <p>Active Distributors</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon success">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="kpi-content">
+            <h3 id="pending-deliveries">0</h3>
+            <p>Pending Deliveries</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon info">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <div class="kpi-content">
+            <h3 id="coverage-rate">0%</h3>
+            <p>County Coverage</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-container">
+          <h3>LPG Distribution by Region</h3>
+          <canvas id="distribution-chart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="map-container">
+          <h3>Live LPG Locations Across Kenya</h3>
+          <div id="kenya-lpg-map" class="map"></div>
+        </div>
+      </div>
+
+      <div class="live-feed">
+        <h3><i class="fas fa-rss"></i> Live Events</h3>
+        <div id="events-feed" class="events-list">
+          <!-- Events will be populated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Cylinders Page -->
+    <section id="cylinders-page" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-gas-pump"></i> LPG Cylinder Management</h2>
+        <div class="header-actions">
+          <button id="scan-qr-btn" class="btn-primary">
+            <i class="fas fa-qrcode"></i> Scan QR
+          </button>
+          <button id="add-cylinder-btn" class="btn-secondary">
+            <i class="fas fa-plus"></i> Add Cylinder
+          </button>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="filter-group">
+          <label for="status-filter">Status:</label>
+          <select id="status-filter">
+            <option value="">All</option>
+            <option value="IN_SERVICE">In Service</option>
+            <option value="EMPTY">Empty</option>
+            <option value="IN_TRANSIT">In Transit</option>
+            <option value="REFILLING">Refilling</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="distributor-filter">Distributor:</label>
+          <select id="distributor-filter">
+            <option value="">All</option>
+            <option value="TotalEnergies">TotalEnergies</option>
+            <option value="SupaGas">SupaGas</option>
+            <option value="Gas Yetu">Gas Yetu</option>
+            <option value="BOC Kenya">BOC Kenya</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="search-cylinders">Search:</label>
+          <input type="text" id="search-cylinders" placeholder="Search by serial or location">
+        </div>
+      </div>
+
+      <div id="cylinders-grid" class="cylinders-grid">
+        <!-- Cylinders will be populated here -->
+      </div>
+    </section>
+
+    <!-- Distributors Page -->
+    <section id="distributors-page" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-store"></i> LPG Distributors in Kenya</h2>
+      </div>
+      <div id="distributors-grid" class="distributors-grid">
+        <!-- Distributors will be populated here -->
+      </div>
+    </section>
+
+    <!-- Other pages -->
+    <section id="deliveries-page" class="page">
+      <h2>Deliveries Management</h2>
+      soon to be added...
+      Track and manage all LPG deliveries across Kenya.
+      Updates will be available in real-time.
+      
+      <div id="deliveries-list"></div>
+    </section>
+
+    <section id="alerts-page" class="page">
+      <h2>Safety Alerts & Monitoring</h2>
+      soon to be added...
+      Updates will be available in real-time for safety compliance.
+      <div id="alerts-list"></div>
+    </section>
+
+  </main>
+
+  <!-- QR Scanner Modal (added as necessary, your UI kept intact) -->
+  <div id="qr-scanner-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-qrcode"></i> QR & Barcode Scanner</h3>
+        <button class="modal-close" id="qr-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="qr-reader" style="width:100%;"></div>
+        <div id="qr-result" class="qr-result" style="margin-top:12px; font-weight:600;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chatbot (ChatGPT-style) -->
+  <!-- Simple chatbot UI -->
+<!-- AI Assistant Widget -->
+<div id="ai-assistant">
+  <div id="ai-header">AI Safety Assistant − Welcome!</div>
+  <div id="ai-messages"></div>
+  <input type="text" id="ai-input" placeholder="Ask me about LPG safety..." />
+  <button id="ai-send">Send</button>
+</div>
+
+<script>
+const messagesDiv = document.getElementById('messages');
+const input = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+
+async function sendMessage() {
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  // Display user message
+  const userDiv = document.createElement('div');
+  userDiv.classList.add('user-msg');
+  userDiv.textContent = userMessage;
+  messagesDiv.appendChild(userDiv);
+
+  // Clear input
+  input.value = '';
+
+  // Send to backend
+  try {
+    const response = await fetch('http://localhost:3000/ask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: userMessage })
+    });
+
+    const data = await response.json();
+
+    // Display AI response
+    const aiDiv = document.createElement('div');
+    aiDiv.classList.add('ai-msg');
+    aiDiv.textContent = data.response || "Sorry, I couldn't get a response.";
+    messagesDiv.appendChild(aiDiv);
+
+    // Scroll to bottom
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  } catch (error) {
+    console.error('Error connecting to AI backend:', error);
+    const errorDiv = document.createElement('div');
+    errorDiv.classList.add('ai-msg');
+    errorDiv.textContent = "Error connecting to AI backend.";
+    messagesDiv.appendChild(errorDiv);
+  }
+}
+
+// Event listeners
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+<style>
+#messages {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.user-msg {
+  text-align: right;
+  background: #d0f0c0;
+  padding: 5px 10px;
+  margin: 5px 0;
+  border-radius: 10px;
+}
+
+.ai-msg {
+  text-align: left;
+  background: #f0d0d0;
+  padding: 5px 10px;
+  margin: 5px 0;
+  border-radius: 10px;
+}
+</style>
+  <!-- End of Chatbot -->
+
+  <!-- Scripts -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Main app script (your JS kept intact + additions) -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
