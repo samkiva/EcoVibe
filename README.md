@@ -1,7 +1,7 @@
-# GreenWells Kenya — LPG Cylinder Tracking & Safety Assistant
+# EcoVibe Kenya — LPG Cylinder Tracking & Safety Assistant
 
 **Overview**
-GreenWells Kenya is a prototype web application for tracking LPG cylinders, visualizing major LPG locations across Kenya, scanning QR/barcodes with the device camera, and interacting with an AI Safety Assistant (ChatGPT-style).
+EcoVibe Kenya is a prototype web application for tracking LPG cylinders, visualizing major LPG locations across Kenya, scanning QR/barcodes with the device camera, and interacting with an AI Safety Assistant (ChatGPT-style).
 
 **Features**
 - OpenStreetMap (Leaflet) visualization of Kenya + major LPG markers
